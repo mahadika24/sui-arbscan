@@ -1,0 +1,6 @@
+{
+  "name": "SuiFlash DEX Scanner & Arbitrage Engine",
+  "description": "Real-time on-chain DEX scanner and flash loan arbitrage simulation engine on Sui Network. Canonical coin verification, zero fake data, and atomic PTB execution planner.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
