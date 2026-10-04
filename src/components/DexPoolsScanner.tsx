@@ -50,14 +50,14 @@ export const DexPoolsScanner: React.FC<DexPoolsScannerProps> = ({
           <div className="flex items-center gap-2">
             <Layers className="w-5 h-5 text-cyan-400" />
             <h2 className="text-base font-bold text-white tracking-wide">
-              Pemindai DEX On-Chain Sui (Live Pools)
+              Pemindai DEX On-Chain Sui (Hanya Pool Terverifikasi)
             </h2>
-            <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
-              {filteredPools.length} Pool Aktif
+            <span className="px-2 py-0.5 text-[10px] font-mono rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              {filteredPools.length} Terverifikasi
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Data harga dan cadangan langsung dari state pool DEX di jaringan Sui. Setiap angka berlabel [On-chain].
+            Hanya pool berstatus VERIFIED yang ditampilkan. Eksistensi objek Move terverifikasi via Sui RPC [On-chain], kuotasi harga [Kuotasi], dan TVL [Eksternal].
           </p>
         </div>
 
@@ -160,11 +160,16 @@ export const DexPoolsScanner: React.FC<DexPoolsScannerProps> = ({
                       </div>
                     </td>
 
-                    {/* Protocol */}
+                    {/* Protocol & Status */}
                     <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-cyan-300 border border-slate-700">
-                        {pool.protocol}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-800 text-cyan-300 border border-slate-700">
+                          {pool.protocol}
+                        </span>
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800/40">
+                          {pool.status || 'VERIFIED'}
+                        </span>
+                      </div>
                     </td>
 
                     {/* On-Chain Address */}

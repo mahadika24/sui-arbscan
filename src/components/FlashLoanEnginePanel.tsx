@@ -8,6 +8,7 @@ import {
   DexPool,
   FlashLoanProtocol,
   ArbitrageOpportunity,
+  NetworkCongestionData,
 } from '../types/dex';
 import {
   calculateFlashLoanArbitrage,
@@ -19,6 +20,7 @@ import {
   formatCanonicalType,
   checkAssetMismatch,
 } from '../services/tokens';
+import { GasFeeEstimator } from './GasFeeEstimator';
 import {
   Zap,
   ArrowRight,
@@ -35,12 +37,14 @@ interface FlashLoanEnginePanelProps {
   pools: DexPool[];
   onOpenPtbModal: (opportunity: ArbitrageOpportunity) => void;
   suiPriceUsd?: number;
+  congestion?: NetworkCongestionData;
 }
 
 export const FlashLoanEnginePanel: React.FC<FlashLoanEnginePanelProps> = ({
   pools,
   onOpenPtbModal,
   suiPriceUsd = 1.18,
+  congestion,
 }) => {
   const [borrowTokenSymbol, setBorrowTokenSymbol] = useState<string>('SUI');
   const [intermediateTokenSymbol, setIntermediateTokenSymbol] = useState<string>('USDC');
@@ -273,6 +277,13 @@ export const FlashLoanEnginePanel: React.FC<FlashLoanEnginePanelProps> = ({
           )}
         </div>
       </div>
+
+      {/* Real-time Network Congestion Gas Fee Estimator */}
+      <GasFeeEstimator
+        congestion={congestion}
+        suiPriceUsd={suiPriceUsd}
+        netProfitUsd={opportunity?.estimatedNetProfitUsd?.value ?? null}
+      />
 
       {/* Execution Math Breakdown Box */}
       {errorMessage ? (

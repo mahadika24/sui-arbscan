@@ -74,6 +74,7 @@ export function formatSourcedValue<T>(
   let badgeLabel = '[On-chain]';
   if (item.source === 'simulasi') badgeLabel = '[Simulasi]';
   if (item.source === 'kuotasi') badgeLabel = '[Kuotasi]';
+  if (item.source === 'eksternal') badgeLabel = '[Eksternal]';
 
   return {
     display: `${formatted} ${badgeLabel}`,

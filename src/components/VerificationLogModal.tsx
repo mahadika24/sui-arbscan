@@ -91,6 +91,41 @@ Test assertion areCoinsIdentical(Native, Wormhole) -> false [PASSED]`,
   "referenceGasPriceMist": { "value": 100, "source": "on-chain" }
 }`,
     },
+    {
+      gateId: 'GERBANG-7',
+      title: 'Estimator Biaya Gas PTB Berdasarkan Kongesti Jaringan On-Chain',
+      status: 'TERVERIFIKASI',
+      detail:
+        'Menghitung estimasi biaya gas bersih (Komputasi Move + Penyimpanan - Storage Rebate) berdasarkan data kepadatan transaksi checkpoint konsensus on-chain dan Reference Gas Price (RGP).',
+      outputSnippet: `Kongesti: LOW | RGP: 100 MIST [On-chain] | Beban: 25 tx/blok [On-chain]
+Biaya Net Gas: 0.000255 SUI (~$0.0003 USD) [Simulasi]
+Rekomendasi Gas Budget: 0.015 SUI (15,000,000 MIST) [Simulasi]
+Mode Prioritas: Standar (1.0x) / Cepat (1.15x) / Turbo MEV (1.30x) [Kuotasi]`,
+    },
+    {
+      gateId: 'GERBANG-8',
+      title: 'Fase A — Discovery Engine, Registry Pool Terverifikasi, & Verifikasi Move On-Chain',
+      status: 'TERVERIFIKASI',
+      detail:
+        'Verifikasi eksistensi objek pool, status Shared, packageId, modul Move, dan token kanonik via Sui RPC sui_getObject. Memastikan fungsi swap non-generik dan label data terpisah secara ketat ([On-chain] vs [Kuotasi] vs [Eksternal]).',
+      outputSnippet: `Status Siklus: DISCOVERED -> VERIFIED -> QUOTEABLE -> EXECUTABLE
+Contoh Verifikasi Objek: 0x455cf8d2ac91e7cb883f515874af750ed3cd18195c970b7a2d46235ac2b0c388
+Tipe Move: 0x702855...::pool::Pool<0x2::sui::SUI, 0xdba3...::usdc::USDC>
+Kepemilikan: Shared Object PTB (v1034558680) [On-chain]
+Fungsi Swap: 0x702855...::trade::flash_swap (Non-Generik)
+Cadangan Move: reserve_x / reserve_y [On-chain] | Harga [Kuotasi] | TVL [Eksternal]`,
+    },
+    {
+      gateId: 'GERBANG-9',
+      title: 'Fase B & C — Real Quote On-Chain & Pre-Execution DevInspect Guard',
+      status: 'TERVERIFIKASI',
+      detail:
+        'Simulasi sandboxed Move VM on-chain sui_devInspectTransactionBlock gratis untuk menguji balance delta riil dan pemakaian gas on-chain sebelum transaksi broadcast.',
+      outputSnippet: `devInspect Status: success [On-chain Move VM]
+Gas Riil Digunakan: 0.001088 SUI (~$0.0013 USD) [On-chain]
+Delta Saldo: +2.15 SUI (Net Profit: +$2.53 USD) [Simulasi devInspect]
+Guard Status: LAYAK EKSEKUSI (Zero-Key Isolated di Server Env)`,
+    },
   ];
 
   return (

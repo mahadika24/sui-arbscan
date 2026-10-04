@@ -12,6 +12,8 @@ import { FlashLoanEnginePanel } from './components/FlashLoanEnginePanel';
 import { PtbInspectorModal } from './components/PtbInspectorModal';
 import { SecurityPolicyModal } from './components/SecurityPolicyModal';
 import { VerificationLogModal } from './components/VerificationLogModal';
+import { DiscoveryEngineRegistry } from './components/DiscoveryEngineRegistry';
+import { BotExecutionGuardPanel } from './components/BotExecutionGuardPanel';
 import { DexPool, SuiChainStatus, ArbitrageOpportunity } from './types/dex';
 import {
   Zap,
@@ -19,18 +21,21 @@ import {
   Layers,
   Terminal,
   CheckCircle,
+  Compass,
+  Cpu,
 } from 'lucide-react';
 
 function DashboardContent() {
   const [chainStatus, setChainStatus] = useState<SuiChainStatus | null>(null);
   const [pools, setPools] = useState<DexPool[]>([]);
+  const [allDiscoveredPools, setAllDiscoveredPools] = useState<DexPool[]>([]);
   const [isLoadingPools, setIsLoadingPools] = useState<boolean>(true);
   const [poolsError, setPoolsError] = useState<string | null>(null);
   const [isRefreshingStatus, setIsRefreshingStatus] = useState<boolean>(false);
   const [selectedOpportunity, setSelectedOpportunity] = useState<ArbitrageOpportunity | null>(null);
   const [showSecurityModal, setShowSecurityModal] = useState<boolean>(false);
   const [showVerificationModal, setShowVerificationModal] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'pools' | 'simulator' | 'canonical'>('pools');
+  const [activeTab, setActiveTab] = useState<'discovery' | 'pools' | 'simulator' | 'bot' | 'canonical'>('discovery');
 
   // Fetch live Sui on-chain status
   const fetchChainStatus = useCallback(async () => {
@@ -51,7 +56,7 @@ function DashboardContent() {
     setIsRefreshingStatus(false);
   };
 
-  // Fetch live verified DEX pools
+  // Fetch live verified DEX pools (Phase A Discovery Engine)
   const fetchPools = useCallback(async () => {
     setIsLoadingPools(true);
     setPoolsError(null);
@@ -60,7 +65,11 @@ function DashboardContent() {
       const data = await res.json();
       if (data.pools && Array.isArray(data.pools)) {
         setPools(data.pools);
-      } else if (data.error) {
+      }
+      if (data.allDiscoveredPools && Array.isArray(data.allDiscoveredPools)) {
+        setAllDiscoveredPools(data.allDiscoveredPools);
+      }
+      if (data.error) {
         setPoolsError(data.error);
       }
     } catch (err: any) {
@@ -141,6 +150,18 @@ function DashboardContent() {
           {/* Navigation Tabs */}
           <div className="mt-6 pt-4 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
             <button
+              onClick={() => setActiveTab('discovery')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold transition-all ${
+                activeTab === 'discovery'
+                  ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
+                  : 'bg-slate-850 hover:bg-slate-800 text-slate-300 border border-slate-800'
+              }`}
+            >
+              <Compass className="w-4 h-4" />
+              <span>1. Discovery Engine & Registry ({allDiscoveredPools.length || pools.length})</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('pools')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold transition-all ${
                 activeTab === 'pools'
@@ -149,7 +170,7 @@ function DashboardContent() {
               }`}
             >
               <Layers className="w-4 h-4" />
-              <span>1. Pemindai DEX On-Chain ({pools.length})</span>
+              <span>2. Pemindai DEX (Terverifikasi: {pools.length})</span>
             </button>
 
             <button
@@ -161,7 +182,19 @@ function DashboardContent() {
               }`}
             >
               <Zap className="w-4 h-4" />
-              <span>2. Simulator Flash Loan PTB</span>
+              <span>3. Simulator Flash Loan PTB</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('bot')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-mono font-semibold transition-all ${
+                activeTab === 'bot'
+                  ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
+                  : 'bg-slate-850 hover:bg-slate-800 text-slate-300 border border-slate-800'
+              }`}
+            >
+              <Cpu className="w-4 h-4" />
+              <span>4. Bot & DevInspect Guard (Fase B & C)</span>
             </button>
 
             <button
@@ -173,12 +206,22 @@ function DashboardContent() {
               }`}
             >
               <CheckCircle className="w-4 h-4" />
-              <span>3. Inspektor Kanonikal & Isolasi Koin</span>
+              <span>5. Inspektor Kanonikal & Isolasi Koin</span>
             </button>
           </div>
         </div>
 
         {/* Tab Content Display */}
+        {activeTab === 'discovery' && (
+          <DiscoveryEngineRegistry
+            pools={pools}
+            allDiscoveredPools={allDiscoveredPools}
+            isLoading={isLoadingPools}
+            onRefresh={fetchPools}
+            onSelectPoolForArbitrage={handleSelectPoolForArbitrage}
+          />
+        )}
+
         {activeTab === 'pools' && (
           <DexPoolsScanner
             pools={pools}
@@ -193,6 +236,14 @@ function DashboardContent() {
           <FlashLoanEnginePanel
             pools={pools}
             onOpenPtbModal={(opp) => setSelectedOpportunity(opp)}
+            suiPriceUsd={1.18}
+            congestion={chainStatus?.congestion}
+          />
+        )}
+
+        {activeTab === 'bot' && (
+          <BotExecutionGuardPanel
+            pools={pools}
             suiPriceUsd={1.18}
           />
         )}
